@@ -24,11 +24,11 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 </div>
 
 <script>
-const API = "https://api.yournote.space/baihuo";
+const API_URL = "http://47.103.37.228/api/goods";
 
 async function getGoods() {
   try {
-    let res = await fetch(API);
+    let res = await fetch(API_URL);
     return await res.json() || {};
   } catch (e) {
     return {};
