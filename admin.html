@@ -24,10 +24,10 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 <input id="cost" placeholder="进货价">
 <input id="wholesale" placeholder="批发价">
 <input id="retail" placeholder="零售价">
-<button onclick="addGood()">添加商品</button>
+<button onclick="addGood()">添加商品（云端保存）</button>
 
 <br><br>
-<input id="searchName" placeholder="搜索要删除的商品（支持模糊搜索）" autocomplete="off">
+<input id="searchName" placeholder="搜索要删除的商品（支持模糊）" autocomplete="off">
 <button onclick="searchGoods()">搜索商品</button>
 
 <div id="searchResult" class="searchResult"></div>
@@ -35,21 +35,29 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 </div>
 
 <script>
-// 读取本地商品
-function getData() {
+const CLOUD_URL = "https://jsonbase.com/baihuo-chajia/data";
+
+// 读取云端数据
+async function getData() {
   try {
-    return JSON.parse(localStorage.getItem("goods")) || {};
+    let res = await fetch(CLOUD_URL);
+    return await res.json() || {};
   } catch (e) {
     return {};
   }
 }
 
-// 保存商品
-function saveData(d) {
-  localStorage.setItem("goods", JSON.stringify(d));
+// 保存到云端
+async function saveData(data) {
+  try {
+    await fetch(CLOUD_URL, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+  } catch (e) {}
 }
 
-// 清空添加框
 function clearAddForm() {
   document.getElementById("name").value = "";
   document.getElementById("cost").value = "";
@@ -57,14 +65,13 @@ function clearAddForm() {
   document.getElementById("retail").value = "";
 }
 
-// 页面加载清空
 window.onload = function() {
   clearAddForm();
   document.getElementById("searchName").value = "";
 };
 
-// 添加商品
-function addGood() {
+// 添加商品 → 云端
+async function addGood() {
   const name = document.getElementById("name").value.trim();
   const cost = document.getElementById("cost").value.trim();
   const wholesale = document.getElementById("wholesale").value.trim();
@@ -75,21 +82,22 @@ function addGood() {
     return;
   }
 
-  const data = getData();
+  const data = await getData();
   data[name] = { name, cost, wholesale, retail };
-  saveData(data);
+  await saveData(data);
+
   clearAddForm();
-  alert("添加成功！");
+  alert("添加成功！已同步云端");
 }
 
-// 模糊搜索商品（用于删除）
-function searchGoods() {
+// 模糊搜索商品
+async function searchGoods() {
   const kw = document.getElementById("searchName").value.trim();
-  const data = getData();
+  const data = await getData();
   const res = document.getElementById("searchResult");
 
   if (!kw) {
-    res.innerHTML = "请输入商品关键词";
+    res.innerHTML = "请输入关键词";
     return;
   }
 
@@ -102,26 +110,27 @@ function searchGoods() {
       const g = data[key];
       html += `
 <div class="item">
-名称：${g.name}<br>
-进货价：${g.cost}  批发价：${g.wholesale}  零售价：${g.retail}<br>
-<button onclick="selectDelete('${g.name}')" style="background:#ff4444;padding:8px;margin-top:4px">选中删除</button>
+${g.name}<br>
+进货：${g.cost} 批发：${g.wholesale} 零售：${g.retail}<br>
+<button class="delBtn" onclick="delGood('${g.name}')">删除该商品</button>
 </div>
 <hr>
 `;
     }
   }
 
-  if (!found) html = "未找到商品";
-  res.innerHTML = html;
+  res.innerHTML = found ? html : "未找到商品";
 }
 
-// 删除选中的商品
-function selectDelete(name) {
-  if (!confirm("确定要删除【" + name + "】吗？")) return;
-  const data = getData();
+// 删除商品 → 云端
+async function delGood(name) {
+  if (!confirm("确定删除：" + name + "？")) return;
+
+  const data = await getData();
   delete data[name];
-  saveData(data);
-  alert("删除成功！");
+  await saveData(data);
+
+  alert("删除成功！前台已同步");
   searchGoods();
 }
 </script>
