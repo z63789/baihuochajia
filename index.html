@@ -7,118 +7,61 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
 body{background:#f7f8fa;padding:20px}
-
-.title{
-  text-align: center;
-  font-size: 36px;
-  font-weight: bold;
-  color: #2c3e50;
-  margin-bottom: 24px;
-}
-
-.box{
-  background:#fff;
-  border-radius:16px;
-  padding:24px;
-  max-width:400px;
-  margin:0 auto;
-  box-shadow:0 3px 12px rgba(0,0,0,0.08);
-}
-
-input{
-  width:100%;
-  padding:16px;
-  border:1px solid #e4e7ed;
-  border-radius:10px;
-  margin-bottom:12px;
-  font-size:16px;
-}
-
-button{
-  width:100%;
-  padding:16px;
-  border:none;
-  border-radius:10px;
-  font-size:17px;
-  margin-bottom:10px;
-}
-
-button:first-of-type{
-  background:#2196f3;
-  color:#fff;
-}
-
-.admin-btn{
-  background:#666;
-  color:#fff;
-}
-
-.result{
-  margin-top:20px;
-  padding:20px;
-  background:#f5f7fa;
-  border-radius:10px;
-  line-height:2.2;
-  font-size:17px;
-}
+.title{text-align:center;font-size:36px;font-weight:bold;color:#2c3e50;margin-bottom:24px}
+.box{background:#fff;border-radius:16px;padding:24px;max-width:400px;margin:0 auto;box-shadow:0 3px 12px rgba(0,0,0,0.08)}
+input{width:100%;padding:16px;border:1px solid #e4e7ed;border-radius:10px;margin-bottom:12px;font-size:16px}
+button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;margin-bottom:10px;color:#fff}
+button:nth-of-type(1){background:#2196f3}
+button:nth-of-type(2){background:#666}
+.result{margin-top:20px;padding:20px;background:#f5f7fa;border-radius:10px;line-height:2.2;font-size:17px}
 </style>
 </head>
-
 <body>
 <div class="title">老李床上用品</div>
 <div class="box">
-  <input id="kw" placeholder="输入商品名称查询（支持模糊搜索）">
-  <button onclick="search()">查询价格</button>
-  <button class="admin-btn" onclick="goAdmin()">后台管理</button>
-  <div class="result" id="res"></div>
+<input id="kw" placeholder="输入商品名称查询（支持模糊搜索）">
+<button onclick="search()">查询价格</button>
+<button onclick="goAdmin()">后台管理</button>
+<div class="result" id="res"></div>
 </div>
-
 <script>
-// 统一键名：allGoods
-var allGoods = JSON.parse(localStorage.getItem('allGoods')) || {};
+const GIST_URL = "https://gist.githubusercontent.com/z63789/8b68e7a9bd08530e727c3a540bde90cd/raw/allGoods.json";
 
-function search() {
-  var kw = document.getElementById('kw').value.trim();
-  var res = document.getElementById('res');
-
-  if (kw === "") {
-    alert("请输入商品名称");
-    return;
+async function loadCloudData() {
+  try {
+    let res = await fetch(GIST_URL);
+    return await res.json() || {};
+  } catch (e) {
+    return {};
   }
+}
 
-  // 模糊搜索
-  var matches = [];
-  for (var name in allGoods) {
-    if (name.includes(kw)) {
-      matches.push({ name: name, data: allGoods[name] });
-    }
+async function search() {
+  let kw = document.getElementById("kw").value.trim();
+  let res = document.getElementById("res");
+  if (!kw) { alert("请输入商品名称"); return; }
+  let allGoods = await loadCloudData();
+  let matches = [];
+  for (let name in allGoods) {
+    if (name.includes(kw)) matches.push({ name, data: allGoods[name] });
   }
-
-  if (matches.length === 0) {
-    res.innerHTML = '未找到相关商品';
-    return;
-  }
-
-  var html = '';
-  matches.forEach(function(item) {
+  if (matches.length === 0) { res.innerHTML = "未找到相关商品"; return; }
+  let html = "";
+  matches.forEach(item => {
     html += `
 商品名称：${item.name}<br>
 进货价：${item.data.cost}<br>
 批发价：${item.data.wholesale}<br>
 零售价：${item.data.retail}
-<br><hr style="margin:12px 0;border:0;border-top:1px solid #ddd;">
-    `;
+<hr style="margin:12px 0;border-top:1px solid #ddd;">`;
   });
   res.innerHTML = html;
 }
 
 function goAdmin() {
-  var pwd = prompt("请输入后台密码");
-  if (pwd === "admin") {
-    window.location.href = "admin.html";
-  } else {
-    alert("密码错误！");
-  }
+  let pwd = prompt("请输入后台密码");
+  if (pwd === "admin") location.href = "admin.html";
+  else alert("密码错误！");
 }
 </script>
 </body>
