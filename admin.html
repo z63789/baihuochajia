@@ -9,7 +9,7 @@
 body{background:#f7f8fa;padding:20px}
 .title{text-align:center;font-size:32px;font-weight:bold;margin-bottom:24px}
 .card{background:#fff;border-radius:16px;padding:24px;max-width:400px;margin:0 auto;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
-input{width:100%;padding:16px;margin-bottom:12px;border:1px solid #e5e7eb;border-radius:10px;font-size:16px}
+input{width:100%;padding:16px;margin-bottom:12px;border:1px solid #e5e7eb;border-radius:10px;font-size:16px;autocomplete:new-password}
 button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;margin-top:6px}
 .add{background:#2196f3;color:#fff}
 .search{background:#4caf50;color:#fff}
@@ -21,8 +21,6 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 <body>
 <div class="title">后台管理</div>
 <div class="card">
-
-<!-- 加了 autocomplete="new-password" 强制禁用自动填充 -->
 <input id="name" placeholder="商品名称" value="" autocomplete="new-password">
 <input id="cost" placeholder="进货价" value="" autocomplete="new-password">
 <input id="wholesale" placeholder="批发价" value="" autocomplete="new-password">
@@ -34,13 +32,12 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 <input id="kw" placeholder="查询/删除商品" value="" autocomplete="new-password">
 <button class="search" onclick="searchGood()">查询</button>
 <div class="result" id="res"></div>
-
 </div>
 
 <script>
+// 统一键名：allGoods
 var allGoods = JSON.parse(localStorage.getItem('allGoods')) || {};
 
-// 页面加载时强制清空所有输入框
 window.onload = function() {
   document.getElementById('name').value = '';
   document.getElementById('cost').value = '';
@@ -52,15 +49,21 @@ window.onload = function() {
 function addGood() {
   var name = document.getElementById('name').value.trim();
   var cost = document.getElementById('cost').value.trim();
-  var ws = document.getElementById('wholesale').value.trim();
+  var wholesale = document.getElementById('wholesale').value.trim();
   var retail = document.getElementById('retail').value.trim();
 
-  if (!name || !cost || !ws || !retail) {
+  if (!name || !cost || !wholesale || !retail) {
     alert('请填写完整！');
     return;
   }
 
-  allGoods[name] = { cost, wholesale, retail };
+  // 正确存储为对象
+  allGoods[name] = {
+    cost: cost,
+    wholesale: wholesale,
+    retail: retail
+  };
+
   localStorage.setItem('allGoods', JSON.stringify(allGoods));
 
   document.getElementById('name').value = '';
