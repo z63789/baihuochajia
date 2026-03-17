@@ -63,7 +63,7 @@ button{
 <div class="title">老李床上用品</div>
 
 <div class="box">
-  <input id="kw" placeholder="输入商品名称查询">
+  <input id="kw" placeholder="输入商品名称查询（支持模糊搜索）">
   <button onclick="search()">查询价格</button>
   <button class="admin-btn" onclick="goAdmin()">后台管理</button>
   <div class="result" id="res"></div>
@@ -74,32 +74,45 @@ var allGoods = JSON.parse(localStorage.getItem('allGoods')) || {};
 
 function search() {
   var kw = document.getElementById('kw').value.trim();
+  var res = document.getElementById('res');
 
   if (kw === "") {
     alert("请输入商品名称");
     return;
   }
 
-  var res = document.getElementById('res');
+  // 模糊搜索逻辑：匹配包含关键词的商品
+  var matches = [];
+  for (var name in allGoods) {
+    if (name.includes(kw)) {
+      matches.push({
+        name: name,
+        data: allGoods[name]
+      });
+    }
+  }
 
-  if (!allGoods[kw]) {
-    res.innerHTML = '未找到该商品';
+  if (matches.length === 0) {
+    res.innerHTML = '未找到相关商品';
     return;
   }
 
-  res.innerHTML = `
-商品名称：${kw}<br>
-进货价：${allGoods[kw].cost}<br>
-批发价：${allGoods[kw].wholesale}<br>
-零售价：${allGoods[kw].retail}
-  `;
+  // 展示所有匹配到的商品
+  var html = '';
+  matches.forEach(function(item) {
+    html += `
+商品名称：${item.name}<br>
+进货价：${item.data.cost}<br>
+批发价：${item.data.wholesale}<br>
+零售价：${item.data.retail}
+<br><hr style="margin:10px 0;border-color:#eee;">
+    `;
+  });
+  res.innerHTML = html;
 }
 
 function goAdmin() {
-  // 弹出密码输入框
   var password = prompt("请输入后台密码");
-  
-  // 密码正确就进入后台
   if (password === "admin") {
     window.location.href = "admin.html";
   } else {
