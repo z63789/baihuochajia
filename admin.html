@@ -19,15 +19,16 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 <body>
 <div class="title">后台管理</div>
 <div class="card">
-<input id="name" placeholder="商品名称">
-<input id="cost" placeholder="进货价">
-<input id="wholesale" placeholder="批发价">
-<input id="retail" placeholder="零售价">
+<!-- 加了 autocomplete="new-password" 强制禁用自动填充 -->
+<input id="name" placeholder="商品名称" autocomplete="new-password" value="">
+<input id="cost" placeholder="进货价" autocomplete="new-password" value="">
+<input id="wholesale" placeholder="批发价" autocomplete="new-password" value="">
+<input id="retail" placeholder="零售价" autocomplete="new-password" value="">
 <button class="add" onclick="addGood()">添加商品</button>
 
 <div style="margin:20px 0"></div>
 
-<input id="delName" placeholder="要删除的商品名称">
+<input id="delName" placeholder="要删除的商品名称" autocomplete="new-password" value="">
 <button class="del" onclick="delGood()">删除商品</button>
 
 <div class="result" id="res"></div>
@@ -46,6 +47,15 @@ function getData() {
 function saveData(data) {
   localStorage.setItem("goodsData", JSON.stringify(data));
 }
+
+// 页面加载时强制清空所有输入框
+window.onload = function() {
+  document.getElementById("name").value = "";
+  document.getElementById("cost").value = "";
+  document.getElementById("wholesale").value = "";
+  document.getElementById("retail").value = "";
+  document.getElementById("delName").value = "";
+};
 
 function addGood() {
   let name = document.getElementById("name").value.trim();
