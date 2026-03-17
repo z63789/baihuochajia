@@ -5,100 +5,124 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>后台管理</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
 body{background:#f7f8fa;padding:20px}
-.title{text-align:center;font-size:32px;font-weight:bold;margin-bottom:24px}
-.card{background:#fff;border-radius:16px;padding:24px;max-width:400px;margin:0 auto;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
-input{width:100%;padding:16px;margin-bottom:12px;border:1px solid #e5e7eb;border-radius:10px;font-size:16px}
-button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;margin-top:6px;color:#fff}
-.add{background:#2196f3}
-.del{background:#f44336}
-.result{margin-top:18px;padding:16px;background:#f5f7fa;border-radius:10px;line-height:1.9}
+.title{text-align:center;font-size:28px;margin-bottom:24px}
+.card{background:#fff;border-radius:16px;padding:24px;max-width:400px;margin:0 auto;box-shadow:0 3px 12px rgba(0,0,0,0.08)}
+input{width:100%;padding:16px;margin-bottom:12px;border:1px solid #eee;border-radius:10px;font-size:16px}
+button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;margin-top:6px;background:#007bff;color:#fff}
+.delBtn{background:#ff4444}
+.searchResult{margin-top:12px;padding:12px;background:#f5f5f5;border-radius:8px}
+.item{padding:8px 0}
 </style>
 </head>
 <body>
 <div class="title">后台管理</div>
 <div class="card">
+
 <input id="name" placeholder="商品名称" autocomplete="off">
-<input id="cost" placeholder="进货价" autocomplete="off">
-<input id="wholesale" placeholder="批发价" autocomplete="off">
-<input id="retail" placeholder="零售价" autocomplete="off">
-<button class="add" onclick="addGood()">添加商品</button>
+<input id="cost" placeholder="进货价">
+<input id="wholesale" placeholder="批发价">
+<input id="retail" placeholder="零售价">
+<button onclick="addGood()">添加商品</button>
 
-<div style="margin:20px 0"></div>
+<br><br>
+<input id="searchName" placeholder="搜索要删除的商品（支持模糊搜索）" autocomplete="off">
+<button onclick="searchGoods()">搜索商品</button>
 
-<input id="delName" placeholder="要删除的商品名称" autocomplete="off">
-<button class="del" onclick="delGood()">删除商品</button>
+<div id="searchResult" class="searchResult"></div>
 
-<div class="result" id="res"></div>
 </div>
 
 <script>
-// 读取本地存储的商品数据
+// 读取本地商品
 function getData() {
   try {
-    let str = localStorage.getItem("goodsData");
-    return str ? JSON.parse(str) : {};
+    return JSON.parse(localStorage.getItem("goods")) || {};
   } catch (e) {
     return {};
   }
 }
 
-// 保存商品数据到本地存储
-function saveData(data) {
-  localStorage.setItem("goodsData", JSON.stringify(data));
+// 保存商品
+function saveData(d) {
+  localStorage.setItem("goods", JSON.stringify(d));
 }
 
-// 强制清空所有输入框
-function clearInputs() {
+// 清空添加框
+function clearAddForm() {
   document.getElementById("name").value = "";
   document.getElementById("cost").value = "";
   document.getElementById("wholesale").value = "";
   document.getElementById("retail").value = "";
-  document.getElementById("delName").value = "";
 }
 
-// 页面加载后立刻清空，防止浏览器自动填充
+// 页面加载清空
 window.onload = function() {
-  setTimeout(clearInputs, 100);
+  clearAddForm();
+  document.getElementById("searchName").value = "";
 };
 
+// 添加商品
 function addGood() {
-  let name = document.getElementById("name").value.trim();
-  let cost = document.getElementById("cost").value.trim();
-  let wholesale = document.getElementById("wholesale").value.trim();
-  let retail = document.getElementById("retail").value.trim();
+  const name = document.getElementById("name").value.trim();
+  const cost = document.getElementById("cost").value.trim();
+  const wholesale = document.getElementById("wholesale").value.trim();
+  const retail = document.getElementById("retail").value.trim();
 
   if (!name || !cost || !wholesale || !retail) {
-    alert("请填写完整！");
+    alert("请填写完整");
     return;
   }
 
-  let data = getData();
-  // 这里和前台完全对齐：用商品名做key，存{name, cost, wholesale, retail}
-  data[name] = {
-    name: name,
-    cost: cost,
-    wholesale: wholesale,
-    retail: retail
-  };
-  saveData(data); // 保存到本地
-
-  clearInputs();
-  alert("添加成功！前台刷新即可查询～");
+  const data = getData();
+  data[name] = { name, cost, wholesale, retail };
+  saveData(data);
+  clearAddForm();
+  alert("添加成功！");
 }
 
-function delGood() {
-  let name = document.getElementById("delName").value.trim();
-  if (!name) { alert("请输入要删除的商品名"); return; }
+// 模糊搜索商品（用于删除）
+function searchGoods() {
+  const kw = document.getElementById("searchName").value.trim();
+  const data = getData();
+  const res = document.getElementById("searchResult");
 
-  let data = getData();
-  if (!data[name]) { alert("商品不存在"); return; }
+  if (!kw) {
+    res.innerHTML = "请输入商品关键词";
+    return;
+  }
+
+  let html = "";
+  let found = false;
+
+  for (let key in data) {
+    if (key.includes(kw)) {
+      found = true;
+      const g = data[key];
+      html += `
+<div class="item">
+名称：${g.name}<br>
+进货价：${g.cost}  批发价：${g.wholesale}  零售价：${g.retail}<br>
+<button onclick="selectDelete('${g.name}')" style="background:#ff4444;padding:8px;margin-top:4px">选中删除</button>
+</div>
+<hr>
+`;
+    }
+  }
+
+  if (!found) html = "未找到商品";
+  res.innerHTML = html;
+}
+
+// 删除选中的商品
+function selectDelete(name) {
+  if (!confirm("确定要删除【" + name + "】吗？")) return;
+  const data = getData();
   delete data[name];
-  saveData(data); // 保存到本地
-
-  document.getElementById("delName").value = "";
+  saveData(data);
   alert("删除成功！");
+  searchGoods();
 }
 </script>
 </body>
