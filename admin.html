@@ -35,16 +35,16 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 </div>
 
 <script>
-const API = "https://api.yournote.space/baihuo";
+const API_URL = "http://47.103.37.228/api/goods";
 
 async function getData() {
-  let res = await fetch(API);
+  let res = await fetch(API_URL);
   return await res.json() || {};
 }
 
 async function saveData(data) {
-  await fetch(API, {
-    method: "PUT",
+  await fetch(API_URL, {
+    method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
   });
@@ -78,7 +78,7 @@ async function addGood() {
   await saveData(data);
 
   clearAddForm();
-  alert("添加成功！");
+  alert("添加成功！已保存到你的服务器");
 }
 
 async function searchGoods() {
