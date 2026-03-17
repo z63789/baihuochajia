@@ -26,9 +26,10 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 <script>
 const CLOUD_URL = "https://jsonbase.com/baihuo-chajia/data";
 
+// 直接从云端读
 async function getGoods() {
   try {
-    let res = await fetch(CLOUD_URL);
+    const res = await fetch(CLOUD_URL);
     return await res.json() || {};
   } catch (e) {
     return {};
@@ -67,7 +68,6 @@ async function search() {
   res.innerHTML = html;
 }
 
-// 👉 密码已改为 123
 function goAdmin() {
   const pwd = prompt("请输入后台密码");
   if (pwd === "123") location.href = "admin.html";
