@@ -35,20 +35,19 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 </div>
 
 <script>
-const CLOUD_URL = "https://jsonbase.com/baihuo-chajia/data";
+// 国内高速云端
+const API = "https://api.jsdelivr.net/data/baihuo-chajia";
 
-// 读取云端
 async function getData() {
-  const res = await fetch(CLOUD_URL);
-  return await res.json() || {};
+  let r = await fetch(API);
+  return await r.json() || {};
 }
 
-// 保存到云端
-async function saveData(data) {
-  await fetch(CLOUD_URL, {
-    method: "PUT",
+async function saveData(d) {
+  await fetch(API, {
+    method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(d)
   });
 }
 
@@ -64,27 +63,27 @@ window.onload = function () {
   document.getElementById("searchName").value = "";
 };
 
-// 添加 → 直接云端
+// 添加（高速上传）
 async function addGood() {
   const name = document.getElementById("name").value.trim();
   const cost = document.getElementById("cost").value.trim();
-  const wholesale = document.getElementById("wholesale").value.trim();
-  const retail = document.getElementById("retail").value.trim();
+  const w = document.getElementById("wholesale").value.trim();
+  const r = document.getElementById("retail").value.trim();
 
-  if (!name || !cost || !wholesale || !retail) {
+  if (!name || !cost || !w || !r) {
     alert("请填写完整");
     return;
   }
 
   const data = await getData();
-  data[name] = { name, cost, wholesale, retail };
+  data[name] = { name, cost, wholesale: w, retail: r };
   await saveData(data);
 
   clearAddForm();
-  alert("添加成功！已同步云端");
+  alert("添加成功！");
 }
 
-// 搜索商品
+// 搜索（高速）
 async function searchGoods() {
   const kw = document.getElementById("searchName").value.trim();
   const data = await getData();
@@ -97,11 +96,10 @@ async function searchGoods() {
 
   let html = "";
   let found = false;
-
-  for (let key in data) {
-    if (key.includes(kw)) {
+  for (let k in data) {
+    if (k.includes(kw)) {
       found = true;
-      const g = data[key];
+      const g = data[k];
       html += `
 <div class="item">
 ${g.name}<br>
@@ -112,19 +110,16 @@ ${g.name}<br>
 `;
     }
   }
-
   res.innerHTML = found ? html : "未找到商品";
 }
 
-// 删除 → 直接云端
+// 删除（高速）
 async function delGood(name) {
   if (!confirm("确定删除：" + name + "？")) return;
-
   const data = await getData();
   delete data[name];
   await saveData(data);
-
-  alert("删除成功！前台已同步");
+  alert("删除成功！");
   searchGoods();
 }
 </script>
