@@ -24,13 +24,12 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 </div>
 
 <script>
-// 国内高速云端
-const API = "https://api.jsdelivr.net/data/baihuo-chajia";
+const API = "https://api.yournote.space/baihuo";
 
 async function getGoods() {
   try {
-    let r = await fetch(API);
-    return await r.json() || {};
+    let res = await fetch(API);
+    return await res.json() || {};
   } catch (e) {
     return {};
   }
