@@ -24,7 +24,7 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 <input id="cost" placeholder="进货价">
 <input id="wholesale" placeholder="批发价">
 <input id="retail" placeholder="零售价">
-<button onclick="addGood()">添加商品（云端保存）</button>
+<button onclick="addGood()">添加商品</button>
 
 <br><br>
 <input id="searchName" placeholder="搜索要删除的商品（支持模糊）" autocomplete="off">
@@ -37,24 +37,37 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 <script>
 const CLOUD_URL = "https://jsonbase.com/baihuo-chajia/data";
 
-// 读取云端数据
-async function getData() {
+// 先读本地
+function getData() {
   try {
-    let res = await fetch(CLOUD_URL);
-    return await res.json() || {};
+    return JSON.parse(localStorage.getItem("goods")) || {};
   } catch (e) {
     return {};
   }
 }
 
-// 保存到云端
-async function saveData(data) {
+// 先存本地
+function saveDataLocal(data) {
+  localStorage.setItem("goods", JSON.stringify(data));
+}
+
+// 后台同步云端
+async function syncCloud(data) {
   try {
     await fetch(CLOUD_URL, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
+  } catch (e) {}
+}
+
+// 打开后台时从云端拉取
+async function pullCloud() {
+  try {
+    let res = await fetch(CLOUD_URL);
+    let data = await res.json() || {};
+    saveDataLocal(data);
   } catch (e) {}
 }
 
@@ -65,13 +78,14 @@ function clearAddForm() {
   document.getElementById("retail").value = "";
 }
 
-window.onload = function() {
+window.onload = async function () {
   clearAddForm();
   document.getElementById("searchName").value = "";
+  await pullCloud();
 };
 
-// 添加商品 → 云端
-async function addGood() {
+// 添加商品（秒保存）
+function addGood() {
   const name = document.getElementById("name").value.trim();
   const cost = document.getElementById("cost").value.trim();
   const wholesale = document.getElementById("wholesale").value.trim();
@@ -82,18 +96,19 @@ async function addGood() {
     return;
   }
 
-  const data = await getData();
+  const data = getData();
   data[name] = { name, cost, wholesale, retail };
-  await saveData(data);
+  saveDataLocal(data);
+  syncCloud(data);
 
   clearAddForm();
-  alert("添加成功！已同步云端");
+  alert("添加成功！");
 }
 
-// 模糊搜索商品
+// 搜索商品
 async function searchGoods() {
   const kw = document.getElementById("searchName").value.trim();
-  const data = await getData();
+  const data = getData();
   const res = document.getElementById("searchResult");
 
   if (!kw) {
@@ -122,13 +137,14 @@ ${g.name}<br>
   res.innerHTML = found ? html : "未找到商品";
 }
 
-// 删除商品 → 云端
-async function delGood(name) {
+// 删除商品
+function delGood(name) {
   if (!confirm("确定删除：" + name + "？")) return;
 
-  const data = await getData();
+  const data = getData();
   delete data[name];
-  await saveData(data);
+  saveDataLocal(data);
+  syncCloud(data);
 
   alert("删除成功！前台已同步");
   searchGoods();
