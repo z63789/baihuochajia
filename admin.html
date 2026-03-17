@@ -35,19 +35,18 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 </div>
 
 <script>
-// 国内高速云端
-const API = "https://api.jsdelivr.net/data/baihuo-chajia";
+const API = "https://api.yournote.space/baihuo";
 
 async function getData() {
-  let r = await fetch(API);
-  return await r.json() || {};
+  let res = await fetch(API);
+  return await res.json() || {};
 }
 
-async function saveData(d) {
+async function saveData(data) {
   await fetch(API, {
-    method: "POST",
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(d)
+    body: JSON.stringify(data)
   });
 }
 
@@ -63,27 +62,25 @@ window.onload = function () {
   document.getElementById("searchName").value = "";
 };
 
-// 添加（高速上传）
 async function addGood() {
   const name = document.getElementById("name").value.trim();
   const cost = document.getElementById("cost").value.trim();
-  const w = document.getElementById("wholesale").value.trim();
-  const r = document.getElementById("retail").value.trim();
+  const wholesale = document.getElementById("wholesale").value.trim();
+  const retail = document.getElementById("retail").value.trim();
 
-  if (!name || !cost || !w || !r) {
+  if (!name || !cost || !wholesale || !retail) {
     alert("请填写完整");
     return;
   }
 
   const data = await getData();
-  data[name] = { name, cost, wholesale: w, retail: r };
+  data[name] = { name, cost, wholesale, retail };
   await saveData(data);
 
   clearAddForm();
   alert("添加成功！");
 }
 
-// 搜索（高速）
 async function searchGoods() {
   const kw = document.getElementById("searchName").value.trim();
   const data = await getData();
@@ -96,10 +93,10 @@ async function searchGoods() {
 
   let html = "";
   let found = false;
-  for (let k in data) {
-    if (k.includes(kw)) {
+  for (let key in data) {
+    if (key.includes(kw)) {
       found = true;
-      const g = data[k];
+      const g = data[key];
       html += `
 <div class="item">
 ${g.name}<br>
@@ -113,7 +110,6 @@ ${g.name}<br>
   res.innerHTML = found ? html : "未找到商品";
 }
 
-// 删除（高速）
 async function delGood(name) {
   if (!confirm("确定删除：" + name + "？")) return;
   const data = await getData();
