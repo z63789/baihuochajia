@@ -19,7 +19,6 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 <body>
 <div class="title">后台管理</div>
 <div class="card">
-<!-- 加了 autocomplete="new-password" 强制禁用自动填充 -->
 <input id="name" placeholder="商品名称" autocomplete="new-password" value="">
 <input id="cost" placeholder="进货价" autocomplete="new-password" value="">
 <input id="wholesale" placeholder="批发价" autocomplete="new-password" value="">
@@ -48,7 +47,6 @@ function saveData(data) {
   localStorage.setItem("goodsData", JSON.stringify(data));
 }
 
-// 页面加载时强制清空所有输入框
 window.onload = function() {
   document.getElementById("name").value = "";
   document.getElementById("cost").value = "";
