@@ -75,7 +75,13 @@ function addGood() {
   }
 
   let data = getData();
-  data[name] = { name, cost, wholesale, retail };
+  // 这里和前台完全对齐：用商品名做key，存{name, cost, wholesale, retail}
+  data[name] = {
+    name: name,
+    cost: cost,
+    wholesale: wholesale,
+    retail: retail
+  };
   saveData(data); // 保存到本地
 
   clearInputs();
