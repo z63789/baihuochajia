@@ -19,7 +19,6 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 <body>
 <div class="title">后台管理</div>
 <div class="card">
-<!-- 加了 autocomplete="off" 彻底禁用自动填充 -->
 <input id="name" placeholder="商品名称" autocomplete="off">
 <input id="cost" placeholder="进货价" autocomplete="off">
 <input id="wholesale" placeholder="批发价" autocomplete="off">
@@ -35,6 +34,7 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 </div>
 
 <script>
+// 读取本地存储的商品数据
 function getData() {
   try {
     let str = localStorage.getItem("goodsData");
@@ -44,11 +44,12 @@ function getData() {
   }
 }
 
+// 保存商品数据到本地存储
 function saveData(data) {
   localStorage.setItem("goodsData", JSON.stringify(data));
 }
 
-// 🌟 这里是关键！无论如何都强制清空输入框
+// 强制清空所有输入框
 function clearInputs() {
   document.getElementById("name").value = "";
   document.getElementById("cost").value = "";
@@ -57,9 +58,8 @@ function clearInputs() {
   document.getElementById("delName").value = "";
 }
 
-// 页面加载完成后立刻执行清空
+// 页面加载后立刻清空，防止浏览器自动填充
 window.onload = function() {
-  // 稍微延时一点点，确保浏览器缓存没机会填进去
   setTimeout(clearInputs, 100);
 };
 
@@ -76,27 +76,22 @@ function addGood() {
 
   let data = getData();
   data[name] = { name, cost, wholesale, retail };
-  saveData(data);
+  saveData(data); // 保存到本地
 
-  // 添加完立即清空
   clearInputs();
-  
-  alert("添加成功！\n请复制下面内容，手动上传到 GitHub 替换 goods.json");
-  console.log(JSON.stringify(data, null, 2));
+  alert("添加成功！前台刷新即可查询～");
 }
 
 function delGood() {
   let name = document.getElementById("delName").value.trim();
-  if (!name) { alert("请输入商品名"); return; }
+  if (!name) { alert("请输入要删除的商品名"); return; }
 
   let data = getData();
   if (!data[name]) { alert("商品不存在"); return; }
   delete data[name];
-  saveData(data);
-  
-  // 删除后清空输入框
+  saveData(data); // 保存到本地
+
   document.getElementById("delName").value = "";
-  
   alert("删除成功！");
 }
 </script>
