@@ -9,91 +9,78 @@
 body{background:#f7f8fa;padding:20px}
 .title{text-align:center;font-size:32px;font-weight:bold;margin-bottom:24px}
 .card{background:#fff;border-radius:16px;padding:24px;max-width:400px;margin:0 auto;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
-input{width:100%;padding:16px;margin-bottom:12px;border:1px solid #e5e7eb;border-radius:10px;font-size:16px;autocomplete:new-password}
-button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;margin-top:6px}
-.add{background:#2196f3;color:#fff}
-.search{background:#4caf50;color:#fff}
-.del{background:#f44336;color:#fff;padding:8px 12px;border-radius:6px;width:auto;margin-top:10px}
+input{width:100%;padding:16px;margin-bottom:12px;border:1px solid #e5e7eb;border-radius:10px;font-size:16px}
+button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;margin-top:6px;color:#fff}
+.add{background:#2196f3}
+.del{background:#f44336}
 .result{margin-top:18px;padding:16px;background:#f5f7fa;border-radius:10px;line-height:1.9}
 </style>
 </head>
-
 <body>
 <div class="title">后台管理</div>
 <div class="card">
-<input id="name" placeholder="商品名称" value="" autocomplete="new-password">
-<input id="cost" placeholder="进货价" value="" autocomplete="new-password">
-<input id="wholesale" placeholder="批发价" value="" autocomplete="new-password">
-<input id="retail" placeholder="零售价" value="" autocomplete="new-password">
+<input id="name" placeholder="商品名称">
+<input id="cost" placeholder="进货价">
+<input id="wholesale" placeholder="批发价">
+<input id="retail" placeholder="零售价">
 <button class="add" onclick="addGood()">添加商品</button>
 
 <div style="margin:20px 0"></div>
 
-<input id="kw" placeholder="查询/删除商品" value="" autocomplete="new-password">
-<button class="search" onclick="searchGood()">查询</button>
+<input id="delName" placeholder="要删除的商品名称">
+<button class="del" onclick="delGood()">删除商品</button>
+
 <div class="result" id="res"></div>
 </div>
 
 <script>
-// 统一键名：allGoods
-var allGoods = JSON.parse(localStorage.getItem('allGoods')) || {};
+function getData() {
+  try {
+    let str = localStorage.getItem("goodsData");
+    return str ? JSON.parse(str) : {};
+  } catch (e) {
+    return {};
+  }
+}
 
-window.onload = function() {
-  document.getElementById('name').value = '';
-  document.getElementById('cost').value = '';
-  document.getElementById('wholesale').value = '';
-  document.getElementById('retail').value = '';
-  document.getElementById('kw').value = '';
-};
+function saveData(data) {
+  localStorage.setItem("goodsData", JSON.stringify(data));
+}
 
 function addGood() {
-  var name = document.getElementById('name').value.trim();
-  var cost = document.getElementById('cost').value.trim();
-  var wholesale = document.getElementById('wholesale').value.trim();
-  var retail = document.getElementById('retail').value.trim();
+  let name = document.getElementById("name").value.trim();
+  let cost = document.getElementById("cost").value.trim();
+  let wholesale = document.getElementById("wholesale").value.trim();
+  let retail = document.getElementById("retail").value.trim();
 
   if (!name || !cost || !wholesale || !retail) {
-    alert('请填写完整！');
+    alert("请填写完整！");
     return;
   }
 
-  // 正确存储为对象
-  allGoods[name] = {
-    cost: cost,
-    wholesale: wholesale,
-    retail: retail
-  };
+  let data = getData();
+  data[name] = { name, cost, wholesale, retail };
+  saveData(data);
 
-  localStorage.setItem('allGoods', JSON.stringify(allGoods));
+  document.getElementById("name").value = "";
+  document.getElementById("cost").value = "";
+  document.getElementById("wholesale").value = "";
+  document.getElementById("retail").value = "";
 
-  document.getElementById('name').value = '';
-  document.getElementById('cost').value = '';
-  document.getElementById('wholesale').value = '';
-  document.getElementById('retail').value = '';
-  alert('添加成功！前台可查询！');
+  alert("添加成功！\n请复制下面内容，手动上传到 GitHub 替换 goods.json");
+  console.log(JSON.stringify(data, null, 2));
 }
 
-function searchGood() {
-  var kw = document.getElementById('kw').value.trim();
-  var res = document.getElementById('res');
-  if (!kw) { res.innerHTML = '请输入商品名称'; return; }
-  if (!allGoods[kw]) { res.innerHTML = '未找到'; return; }
+function delGood() {
+  let name = document.getElementById("delName").value.trim();
+  if (!name) { alert("请输入商品名"); return; }
 
-  res.innerHTML = `
-商品：${kw}<br>
-进货价：${allGoods[kw].cost}<br>
-批发价：${allGoods[kw].wholesale}<br>
-零售价：${allGoods[kw].retail}
-<br><button class="del" onclick="del('${kw}')">删除</button>
-  `;
-}
-
-function del(name) {
-  if (confirm('确定删除？')) {
-    delete allGoods[name];
-    localStorage.setItem('allGoods', JSON.stringify(allGoods));
-    document.getElementById('res').innerHTML = '已删除';
-  }
+  let data = getData();
+  if (!data[name]) { alert("商品不存在"); return; }
+  delete data[name];
+  saveData(data);
+  alert("删除成功！");
+  document.getElementById("delName").value = "";
 }
 </script>
 </body>
