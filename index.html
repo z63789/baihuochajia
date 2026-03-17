@@ -24,13 +24,13 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 </div>
 
 <script>
-const CLOUD_URL = "https://jsonbase.com/baihuo-chajia/data";
+// 国内高速云端
+const API = "https://api.jsdelivr.net/data/baihuo-chajia";
 
-// 直接从云端读
 async function getGoods() {
   try {
-    const res = await fetch(CLOUD_URL);
-    return await res.json() || {};
+    let r = await fetch(API);
+    return await r.json() || {};
   } catch (e) {
     return {};
   }
@@ -43,11 +43,8 @@ async function search() {
 
   const data = await getGoods();
   const list = [];
-
-  for (let key in data) {
-    if (key.includes(kw)) {
-      list.push(data[key]);
-    }
+  for (let k in data) {
+    if (k.includes(kw)) list.push(data[k]);
   }
 
   if (list.length === 0) {
