@@ -22,15 +22,16 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 <div class="title">后台管理</div>
 <div class="card">
 
-<input id="name" placeholder="商品名称" value="">
-<input id="cost" placeholder="进货价" value="">
-<input id="wholesale" placeholder="批发价" value="">
-<input id="retail" placeholder="零售价" value="">
+<!-- 加了 autocomplete="new-password" 强制禁用自动填充 -->
+<input id="name" placeholder="商品名称" value="" autocomplete="new-password">
+<input id="cost" placeholder="进货价" value="" autocomplete="new-password">
+<input id="wholesale" placeholder="批发价" value="" autocomplete="new-password">
+<input id="retail" placeholder="零售价" value="" autocomplete="new-password">
 <button class="add" onclick="addGood()">添加商品</button>
 
 <div style="margin:20px 0"></div>
 
-<input id="kw" placeholder="查询/删除商品" value="">
+<input id="kw" placeholder="查询/删除商品" value="" autocomplete="new-password">
 <button class="search" onclick="searchGood()">查询</button>
 <div class="result" id="res"></div>
 
@@ -38,6 +39,15 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 
 <script>
 var allGoods = JSON.parse(localStorage.getItem('allGoods')) || {};
+
+// 页面加载时强制清空所有输入框
+window.onload = function() {
+  document.getElementById('name').value = '';
+  document.getElementById('cost').value = '';
+  document.getElementById('wholesale').value = '';
+  document.getElementById('retail').value = '';
+  document.getElementById('kw').value = '';
+};
 
 function addGood() {
   var name = document.getElementById('name').value.trim();
@@ -50,19 +60,13 @@ function addGood() {
     return;
   }
 
-  allGoods[name] = {
-    cost: cost,
-    wholesale: ws,
-    retail: retail
-  };
-
+  allGoods[name] = { cost, wholesale, retail };
   localStorage.setItem('allGoods', JSON.stringify(allGoods));
 
   document.getElementById('name').value = '';
   document.getElementById('cost').value = '';
   document.getElementById('wholesale').value = '';
   document.getElementById('retail').value = '';
-
   alert('添加成功！前台可查询！');
 }
 
