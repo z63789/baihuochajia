@@ -24,12 +24,11 @@ button:nth-of-type(2){background:#666}
 <button onclick="goAdmin()">后台管理</button>
 <div class="result" id="res"></div>
 </div>
-<script>
-const GIST_URL = "https://gist.githubusercontent.com/z63789/8b68e7a9bd08530e727c3a540bde90cd/raw/allGoods.json";
 
-async function loadCloudData() {
+<script>
+async function loadGoods() {
   try {
-    let res = await fetch(GIST_URL);
+    let res = await fetch("goods.json");
     return await res.json() || {};
   } catch (e) {
     return {};
@@ -40,20 +39,24 @@ async function search() {
   let kw = document.getElementById("kw").value.trim();
   let res = document.getElementById("res");
   if (!kw) { alert("请输入商品名称"); return; }
-  let allGoods = await loadCloudData();
-  let matches = [];
-  for (let name in allGoods) {
-    if (name.includes(kw)) matches.push({ name, data: allGoods[name] });
+
+  let goods = await loadGoods();
+  let list = [];
+  for (let name in goods) {
+    if (name.includes(kw)) list.push(goods[name]);
   }
-  if (matches.length === 0) { res.innerHTML = "未找到相关商品"; return; }
+
+  if (list.length === 0) { res.innerHTML = "未找到相关商品"; return; }
+
   let html = "";
-  matches.forEach(item => {
+  list.forEach(item => {
     html += `
-商品名称：${item.name}<br>
-进货价：${item.data.cost}<br>
-批发价：${item.data.wholesale}<br>
-零售价：${item.data.retail}
-<hr style="margin:12px 0;border-top:1px solid #ddd;">`;
+商品：${item.name}<br>
+进货价：${item.cost}<br>
+批发价：${item.wholesale}<br>
+零售价：${item.retail}
+<hr style="margin:10px 0;border-top:1px solid #eee;">
+    `;
   });
   res.innerHTML = html;
 }
