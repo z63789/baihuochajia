@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后台管理</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",sans-serif}
+body{background:#f7f8fa;padding:20px}
+.title{text-align:center;font-size:26px;font-weight:bold;margin-bottom:20px}
+.card{background:#fff;border-radius:14px;padding:24px;max-width:400px;margin:0 auto;box-shadow:0 3px 12px rgba(0,0,0,0.08)}
+input{width:100%;padding:12px;margin-bottom:10px;border:1px solid #e4e7ed;border-radius:8px}
+button{width:100%;padding:13px;border:none;border-radius:8px;margin-top:5px}
+.add{background:#409eff;color:#fff}
+.search{background:#67c23a;color:#fff}
+.del{background:#f56c6c;color:#fff;padding:6px 10px;border-radius:6px;width:auto;margin-top:10px}
+.result{margin-top:18px;padding:16px;background:#f5f7fa;border-radius:10px;line-height:1.9}
+</style>
+</head>
+
+<body>
+<div class="title">后台管理</div>
+<div class="card">
+
+<input id="name" placeholder="商品名称">
+<input id="cost" placeholder="进货价">
+<input id="wholesale" placeholder="批发价">
+<input id="retail" placeholder="零售价">
+<button class="add" onclick="addGood()">添加商品</button>
+
+<div style="margin:20px 0"></div>
+
+<input id="kw" placeholder="查询/删除商品">
+<button class="search" onclick="searchGood()">查询</button>
+<div class="result" id="res"></div>
+
+</div>
+
+<script>
+var allGoods = JSON.parse(localStorage.getItem('allGoods')) || {};
+
+function addGood() {
+  var name = document.getElementById('name').value.trim();
+  var cost = document.getElementById('cost').value.trim();
+  var ws = document.getElementById('wholesale').value.trim();
+  var retail = document.getElementById('retail').value.trim();
+
+  if (!name || !cost || !ws || !retail) {
+    alert('请填写完整！');
+    return;
+  }
+
+  allGoods[name] = {
+    cost: cost,
+    wholesale: ws,
+    retail: retail
+  };
+
+  localStorage.setItem('allGoods', JSON.stringify(allGoods));
+
+  document.getElementById('name').value = '';
+  document.getElementById('cost').value = '';
+  document.getElementById('wholesale').value = '';
+  document.getElementById('retail').value = '';
+
+  alert('添加成功！前台可查询！');
+}
+
+function searchGood() {
+  var kw = document.getElementById('kw').value.trim();
+  var res = document.getElementById('res');
+  if (!kw) { res.innerHTML = '请输入商品名称'; return; }
+  if (!allGoods[kw]) { res.innerHTML = '未找到'; return; }
+
+  res.innerHTML = `
+商品：${kw}<br>
+进货价：${allGoods[kw].cost}<br>
+批发价：${allGoods[kw].wholesale}<br>
+零售价：${allGoods[kw].retail}
+<br><button class="del" onclick="del('${kw}')">删除</button>
+  `;
+}
+
+function del(name) {
+  if (confirm('确定删除？')) {
+    delete allGoods[name];
+    localStorage.setItem('allGoods', JSON.stringify(allGoods));
+    document.getElementById('res').innerHTML = '已删除';
+  }
+}
+</script>
+</body>
+</html>
