@@ -19,15 +19,16 @@ button{width:100%;padding:16px;border:none;border-radius:10px;font-size:17px;mar
 <body>
 <div class="title">后台管理</div>
 <div class="card">
-<input id="name" placeholder="商品名称" autocomplete="new-password" value="">
-<input id="cost" placeholder="进货价" autocomplete="new-password" value="">
-<input id="wholesale" placeholder="批发价" autocomplete="new-password" value="">
-<input id="retail" placeholder="零售价" autocomplete="new-password" value="">
+<!-- 加了 autocomplete="off" 彻底禁用自动填充 -->
+<input id="name" placeholder="商品名称" autocomplete="off">
+<input id="cost" placeholder="进货价" autocomplete="off">
+<input id="wholesale" placeholder="批发价" autocomplete="off">
+<input id="retail" placeholder="零售价" autocomplete="off">
 <button class="add" onclick="addGood()">添加商品</button>
 
 <div style="margin:20px 0"></div>
 
-<input id="delName" placeholder="要删除的商品名称" autocomplete="new-password" value="">
+<input id="delName" placeholder="要删除的商品名称" autocomplete="off">
 <button class="del" onclick="delGood()">删除商品</button>
 
 <div class="result" id="res"></div>
@@ -47,12 +48,19 @@ function saveData(data) {
   localStorage.setItem("goodsData", JSON.stringify(data));
 }
 
-window.onload = function() {
+// 🌟 这里是关键！无论如何都强制清空输入框
+function clearInputs() {
   document.getElementById("name").value = "";
   document.getElementById("cost").value = "";
   document.getElementById("wholesale").value = "";
   document.getElementById("retail").value = "";
   document.getElementById("delName").value = "";
+}
+
+// 页面加载完成后立刻执行清空
+window.onload = function() {
+  // 稍微延时一点点，确保浏览器缓存没机会填进去
+  setTimeout(clearInputs, 100);
 };
 
 function addGood() {
@@ -70,11 +78,9 @@ function addGood() {
   data[name] = { name, cost, wholesale, retail };
   saveData(data);
 
-  document.getElementById("name").value = "";
-  document.getElementById("cost").value = "";
-  document.getElementById("wholesale").value = "";
-  document.getElementById("retail").value = "";
-
+  // 添加完立即清空
+  clearInputs();
+  
   alert("添加成功！\n请复制下面内容，手动上传到 GitHub 替换 goods.json");
   console.log(JSON.stringify(data, null, 2));
 }
@@ -87,8 +93,11 @@ function delGood() {
   if (!data[name]) { alert("商品不存在"); return; }
   delete data[name];
   saveData(data);
-  alert("删除成功！");
+  
+  // 删除后清空输入框
   document.getElementById("delName").value = "";
+  
+  alert("删除成功！");
 }
 </script>
 </body>
